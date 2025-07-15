@@ -250,6 +250,8 @@ func (a *App) StopAudio() error {
 func (a *App) PlayAudioSample() error {
 	sampleText := "This is a sample voice from the selected TTS configuration."
 	filename := filepath.Join(a.config.AudioTempDir, "sample_voice.mp3")
+	// Update TTS client voice to current setting
+	a.ttsClient.voice = a.config.TTSTargetVoice
 	if err := a.ttsClient.TextToSpeech(sampleText, filename); err != nil {
 		return fmt.Errorf("failed to generate TTS sample: %w", err)
 	}
