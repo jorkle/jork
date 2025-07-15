@@ -491,11 +491,13 @@ func (m *Model) renderProcessing() string {
 
 // renderStartupWizard renders the initial configuration wizard UI
 func (m *Model) renderStartupWizard() string {
-	var sb strings.Builder
-	sb.WriteString("Welcome to the JORK Setup Wizard\n\n")
-	sb.WriteString("Please follow the instructions to configure your API keys, AI models, verbosity settings, and encryption.\n")
-	sb.WriteString("Use arrow keys to navigate, Enter to select, Esc to cancel.\n")
-	return sb.String()
+	title := titleStyle.Render("JORK Setup Wizard")
+	instructions := "Configure your settings interactively:\n" +
+		"1. Enter your API keys and model details when prompted\n" +
+		"2. Use arrow keys to navigate options\n" +
+		"3. Press Enter to confirm, Esc to cancel"
+	help := helpStyle.Render("Press Enter to finish setup or Esc to cancel")
+	return lipgloss.JoinVertical(lipgloss.Center, title, "", instructions, "", help)
 }
 
 // formatConversationHistory formats the conversation history for display
