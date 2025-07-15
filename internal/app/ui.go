@@ -654,12 +654,7 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			switch m.selectedSetting {
 			case 0:
 				m.editTitle = "Select Conversation Model"
-				// Use the available models fetched from OpenAI, fallback if none available.
-				if len(m.app.config.AvailableModels) > 0 {
-					m.editOptions = m.app.config.AvailableModels
-				} else {
-					m.editOptions = []string{"claude-3-5-sonnet-20241022", "gpt-4"}
-				}
+				m.editOptions = m.app.config.AvailableModels
 				for i, option := range m.editOptions {
 					if option == m.app.config.ConversationModel {
 						m.cursor = i
