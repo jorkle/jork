@@ -246,6 +246,28 @@ func (a *App) StopAudio() error {
 	return nil
 }
 
+// PlayAudioSample generates and plays a sample TTS audio using the current TTS settings.
+func (a *App) PlayAudioSample() error {
+	sampleText := "This is a sample voice from the selected TTS configuration."
+	filename := filepath.Join(a.config.AudioTempDir, "sample_voice.mp3")
+	if err := a.ttsClient.TextToSpeech(sampleText, filename); err != nil {
+		return fmt.Errorf("failed to generate TTS sample: %w", err)
+	}
+	return a.player.PlayMP3File(filename)
+}
+
+// GenerateExplanationSample creates a sample explanation using the current knowledge level.
+func (a *App) GenerateExplanationSample() (string, error) {
+	prompt := fmt.Sprintf("Explain photosynthesis in a way suitable for %s.", a.state.KnowledgeLevel.String())
+	return a.claudeClient.GenerateResponse(
+		prompt,
+		a.state.KnowledgeLevel,
+		a.state.CurrentMode,
+		a.state.ConversationLog,
+		"general",
+	)
+}
+
 // SetMode changes the communication mode
 func (a *App) SetMode(mode models.CommunicationMode) {
 	a.state.CurrentMode = mode

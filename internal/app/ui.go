@@ -20,6 +20,8 @@ const (
 	Conversation
 	Recording
 	Processing
+	Settings       // NEW: Settings menu state
+	StartupWizard  // NEW: Startup wizard state
 )
 
 // Model represents the Bubbletea model
@@ -514,8 +516,45 @@ func (m *Model) processVoiceInput(audioData *models.AudioData) tea.Cmd {
 }
 
 // Styles
+func (m *Model) renderSettings() string {
+	var sb strings.Builder
+	sb.WriteString("Settings\n\n")
+	sb.WriteString(fmt.Sprintf("1. Conversation Model: %s\n", m.app.config.ConversationModel))
+	sb.WriteString(fmt.Sprintf("2. TTS Model: %s\n", m.app.config.TTSTargetModel))
+	sb.WriteString(fmt.Sprintf("3. TTS Voice: %s (press 'v' to sample)\n", m.app.config.TTSTargetVoice))
+	sb.WriteString(fmt.Sprintf("4. STT Model: %s\n", m.app.config.STTTargetModel))
+	sb.WriteString(fmt.Sprintf("5. Response Verbosity: %d\n", m.app.config.ResponseVerbosity))
+	sb.WriteString(fmt.Sprintf("6. Speech Verbosity: %d\n", m.app.config.SpeechVerbosity))
+	encryptStr := "Off"
+	if m.app.config.EncryptSettings {
+		encryptStr = "On"
+	}
+	sb.WriteString(fmt.Sprintf("7. Encrypt Settings: %s\n", encryptStr))
+	sb.WriteString("\nUse arrow keys to navigate, Enter to edit values, 'v' to hear a sample TTS voice, and Esc to return.")
+	return sb.String()
+}
+
+func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "esc", "q":
+		m.uiState = MainMenu
+		return m, nil
+	case "v":
+		if !m.isSamplingVoice {
+			m.isSamplingVoice = true
+			go func() {
+				_ = m.app.PlayAudioSample()
+			}()
+		} else {
+			_ = m.app.StopAudio()
+			m.isSamplingVoice = false
+		}
+		return m, nil
+	}
+	return m, nil
+}
+
 var (
-	titleStyle = lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("86")).
 		MarginBottom(1)
