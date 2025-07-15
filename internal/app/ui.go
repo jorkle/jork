@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,8 +21,8 @@ const (
 	Conversation
 	Recording
 	Processing
-	Settings       // NEW: Settings menu state
-	SettingsEdit   // NEW: Settings edit dialog state
+	Settings     // NEW: Settings menu state
+	SettingsEdit // NEW: Settings edit dialog state
 )
 
 // Model represents the Bubbletea model
@@ -40,7 +41,7 @@ type Model struct {
 	recordingTime   time.Duration
 	width           int
 	height          int
-	isSamplingVoice bool  // NEW: flag for TTS voice sample playback
+	isSamplingVoice bool // NEW: flag for TTS voice sample playback
 	editTitle       string
 	editOptions     []string
 }
@@ -322,12 +323,12 @@ func (m *Model) View() string {
 // renderMainMenu renders the main menu
 func (m *Model) renderMainMenu() string {
 	title := titleStyle.Render("JORK - AI Communication Assistant")
-	
+
 	state := m.app.GetState()
-	status := fmt.Sprintf("Mode: %s | Knowledge Level: %s", 
-		state.CurrentMode.String(), 
+	status := fmt.Sprintf("Mode: %s | Knowledge Level: %s",
+		state.CurrentMode.String(),
 		state.KnowledgeLevel.String())
-	
+
 	menu := `
 1. Select Communication Mode
 2. Select Knowledge Level
@@ -350,14 +351,14 @@ Press 'q' to quit`
 // renderModeSelection renders the mode selection screen
 func (m *Model) renderModeSelection() string {
 	title := titleStyle.Render("Select Communication Mode")
-	
+
 	modes := []string{
 		"Text → Voice",
-		"Voice → Text", 
+		"Voice → Text",
 		"Text → Text",
 		"Voice → Voice",
 	}
-	
+
 	var items []string
 	for i, mode := range modes {
 		if i == m.selectedMode {
@@ -366,9 +367,9 @@ func (m *Model) renderModeSelection() string {
 			items = append(items, "  "+mode)
 		}
 	}
-	
+
 	help := helpStyle.Render("↑/↓ to navigate, Enter to select, Esc to go back")
-	
+
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
 		title,
@@ -382,14 +383,14 @@ func (m *Model) renderModeSelection() string {
 // renderKnowledgeLevelSelection renders the knowledge level selection screen
 func (m *Model) renderKnowledgeLevelSelection() string {
 	title := titleStyle.Render("Select Knowledge Level")
-	
+
 	levels := []string{
 		"Child",
 		"High School Student",
 		"Freshman University Student",
 		"Co-worker in the Field",
 	}
-	
+
 	var items []string
 	for i, level := range levels {
 		if i == m.selectedLevel {
@@ -398,9 +399,9 @@ func (m *Model) renderKnowledgeLevelSelection() string {
 			items = append(items, "  "+level)
 		}
 	}
-	
+
 	help := helpStyle.Render("↑/↓ to navigate, Enter to select, Esc to go back")
-	
+
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
 		title,
@@ -415,53 +416,53 @@ func (m *Model) renderKnowledgeLevelSelection() string {
 func (m *Model) renderConversation() string {
 	state := m.app.GetState()
 	title := titleStyle.Render("Conversation")
-	
-	status := fmt.Sprintf("Mode: %s | Knowledge Level: %s", 
-		state.CurrentMode.String(), 
+
+	status := fmt.Sprintf("Mode: %s | Knowledge Level: %s",
+		state.CurrentMode.String(),
 		state.KnowledgeLevel.String())
-	
+
 	var response string
 	if m.lastResponse != "" {
 		response = responseStyle.Render("AI: " + m.lastResponse)
 	}
-	
+
 	var errorMsg string
 	if m.error != "" {
 		errorMsg = errorStyle.Render("Error: " + m.error)
 	}
-	
+
 	input := inputStyle.Render("You: " + m.textInput + "█")
-	
+
 	var help string
 	if state.CurrentMode == models.VoiceToText || state.CurrentMode == models.VoiceToVoice {
 		help = helpStyle.Render("Type your message and press Enter, or press Ctrl+R for voice input. Esc to go back.")
 	} else {
 		help = helpStyle.Render("Type your message and press Enter. Esc to go back.")
 	}
-	
+
 	parts := []string{title, "", statusStyle.Render(status), ""}
-	
+
 	if response != "" {
 		parts = append(parts, response, "")
 	}
-	
+
 	if errorMsg != "" {
 		parts = append(parts, errorMsg, "")
 	}
-	
+
 	parts = append(parts, input, "", help)
-	
+
 	return lipgloss.JoinVertical(lipgloss.Left, parts...)
 }
 
 // renderRecording renders the recording interface
 func (m *Model) renderRecording() string {
 	title := titleStyle.Render("Recording...")
-	
+
 	duration := recordingStyle.Render(fmt.Sprintf("Duration: %.1fs", m.recordingTime.Seconds()))
-	
+
 	help := helpStyle.Render("Press Enter or Space to stop recording, Esc to cancel")
-	
+
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
 		title,
@@ -475,11 +476,11 @@ func (m *Model) renderRecording() string {
 // renderProcessing renders the processing interface
 func (m *Model) renderProcessing() string {
 	title := titleStyle.Render("Processing...")
-	
+
 	spinner := processingStyle.Render("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
-	
+
 	help := helpStyle.Render("Please wait...")
-	
+
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
 		title,
@@ -498,7 +499,7 @@ func (m *Model) formatConversationHistory() string {
 	if len(state.ConversationLog) == 0 {
 		return "No conversation history"
 	}
-	
+
 	var history []string
 	for _, entry := range state.ConversationLog {
 		timestamp := entry.Timestamp.Format("15:04:05")
@@ -506,7 +507,7 @@ func (m *Model) formatConversationHistory() string {
 		history = append(history, fmt.Sprintf("[%s] AI: %s", timestamp, entry.AIResponse))
 		history = append(history, "")
 	}
-	
+
 	return strings.Join(history, "\n")
 }
 
@@ -521,7 +522,7 @@ type processingDoneMsg struct {
 	error    string
 }
 
-	// tickRecording creates a command to update recording time
+// tickRecording creates a command to update recording time
 func (m *Model) tickRecording() tea.Cmd {
 	return tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg {
 		return recordingTickMsg{duration: m.recordingTime + 100*time.Millisecond}
@@ -551,7 +552,7 @@ func (m *Model) handleStartupWizardKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 // Styles
 func (m *Model) renderSettings() string {
 	title := titleStyle.Render("Settings")
-	
+
 	// Prepare each setting as a string
 	settings := []string{
 		fmt.Sprintf("Conversation Model: %s", m.app.config.ConversationModel),
@@ -566,7 +567,7 @@ func (m *Model) renderSettings() string {
 		encryptStr = "On"
 	}
 	settings = append(settings, fmt.Sprintf("Encrypt Settings: %s", encryptStr))
-	
+
 	// Render each setting, highlighting the selected one
 	var renderedItems []string
 	for i, setting := range settings {
@@ -576,7 +577,7 @@ func (m *Model) renderSettings() string {
 			renderedItems = append(renderedItems, "  "+setting)
 		}
 	}
-	
+
 	help := helpStyle.Render("↑/↓ to navigate, Enter to edit value, 'v' to sample TTS voice, Esc to return")
 	return lipgloss.JoinVertical(lipgloss.Center, title, "", strings.Join(renderedItems, "\n"), "", help)
 }
@@ -644,50 +645,48 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 var (
 	titleStyle = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("86")).
-		MarginBottom(1)
+			Bold(true).
+			Foreground(lipgloss.Color("86")).
+			MarginBottom(1)
 
 	statusStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("241")).
-		MarginBottom(1)
+			Foreground(lipgloss.Color("241")).
+			MarginBottom(1)
 
 	menuStyle = lipgloss.NewStyle().
-		MarginLeft(2)
+			MarginLeft(2)
 
 	selectedStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("86")).
-		Bold(true)
+			Foreground(lipgloss.Color("86")).
+			Bold(true)
 
 	inputStyle = lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("86")).
-		Padding(0, 1)
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("86")).
+			Padding(0, 1)
 
 	responseStyle = lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("39")).
-		Padding(0, 1).
-		MarginBottom(1)
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("39")).
+			Padding(0, 1).
+			MarginBottom(1)
 
 	errorStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("196")).
-		Bold(true)
+			Foreground(lipgloss.Color("196")).
+			Bold(true)
 
 	helpStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("241")).
-		MarginTop(1)
+			Foreground(lipgloss.Color("241")).
+			MarginTop(1)
 
 	recordingStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("196")).
-		Bold(true)
+			Foreground(lipgloss.Color("196")).
+			Bold(true)
 
 	processingStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("86")).
-		Bold(true)
+			Foreground(lipgloss.Color("86")).
+			Bold(true)
 )
-
-import "strconv"
 
 func (m *Model) handleSettingsEditKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
@@ -729,6 +728,7 @@ func (m *Model) handleSettingsEditKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 }
+
 func (m *Model) renderSettingsEdit() string {
 	title := titleStyle.Render(m.editTitle)
 	var items []string
