@@ -97,7 +97,7 @@ func (a *App) ProcessTextInput(input string) (string, error) {
 	a.state.IsProcessing = true
 	defer func() { a.state.IsProcessing = false }()
 
-	// Generate response using Claude
+	// Generate response using OpenAI
 	response, err := a.openaiClient.GenerateResponse(
 		input,
 		a.state.KnowledgeLevel,
