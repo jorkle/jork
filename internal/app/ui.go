@@ -134,6 +134,8 @@ func (m *Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleProcessingKeys(msg)
 	case Settings:
 		return m.handleSettingsKeys(msg)
+	case StartupWizard:
+		return m.handleStartupWizardKeys(msg)
 	default:
 		return m, nil
 	}
