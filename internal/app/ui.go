@@ -722,6 +722,14 @@ func (m *Model) handleSettingsEditKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			if val, err := strconv.Atoi(m.editOptions[m.cursor]); err == nil {
 				m.app.config.SpeechVerbosity = val
 			}
+		case 7:
+			m.app.config.OpenAIAPIKey = m.editOptions[m.cursor]
+			// Trigger health check after updating the API key
+			if err := m.app.HealthCheck(); err != nil {
+				m.error = "Health Check failed: " + err.Error()
+			} else {
+				m.error = "Health Check passed"
+			}
 		}
 		m.uiState = Settings
 		return m, nil
