@@ -47,7 +47,9 @@ func (c *OpenAIClient) GenerateResponse(
 
 	// Build conversation context
 	messages := GetConversationContext(conversationHistory, 10)
-
+	// Prepend system prompt to ensure the assistant pretends to be a person at the specified knowledge level and responds in voice when in Voice → Voice mode.
+	messages = append([]models.Message{{Role: "system", Content: systemPrompt}}, messages...)
+	
 	// Add the current user input
 	formattedInput := FormatUserInput(userInput, mode)
 	messages = append(messages, models.Message{
