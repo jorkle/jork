@@ -26,19 +26,20 @@ const (
 
 // Model represents the Bubbletea model
 type Model struct {
-	app           *App
-	uiState       UIState
-	textInput     string
-	cursor        int
-	selectedMode  int
-	selectedLevel int
-	message       string
-	error         string
-	lastResponse  string
-	recording     bool
-	recordingTime time.Duration
-	width         int
-	height        int
+	app             *App
+	uiState         UIState
+	textInput       string
+	cursor          int
+	selectedMode    int
+	selectedLevel   int
+	selectedSetting int
+	message         string
+	error           string
+	lastResponse    string
+	recording       bool
+	recordingTime   time.Duration
+	width           int
+	height          int
 	isSamplingVoice bool  // NEW: flag for TTS voice sample playback
 }
 
@@ -543,21 +544,35 @@ func (m *Model) processVoiceInput(audioData *models.AudioData) tea.Cmd {
 
 // Styles
 func (m *Model) renderSettings() string {
-	var sb strings.Builder
-	sb.WriteString("Settings\n\n")
-	sb.WriteString(fmt.Sprintf("1. Conversation Model: %s\n", m.app.config.ConversationModel))
-	sb.WriteString(fmt.Sprintf("2. TTS Model: %s\n", m.app.config.TTSTargetModel))
-	sb.WriteString(fmt.Sprintf("3. TTS Voice: %s (press 'v' to sample)\n", m.app.config.TTSTargetVoice))
-	sb.WriteString(fmt.Sprintf("4. STT Model: %s\n", m.app.config.STTTargetModel))
-	sb.WriteString(fmt.Sprintf("5. Response Verbosity: %d\n", m.app.config.ResponseVerbosity))
-	sb.WriteString(fmt.Sprintf("6. Speech Verbosity: %d\n", m.app.config.SpeechVerbosity))
+	title := titleStyle.Render("Settings")
+	
+	// Prepare each setting as a string
+	settings := []string{
+		fmt.Sprintf("Conversation Model: %s", m.app.config.ConversationModel),
+		fmt.Sprintf("TTS Model: %s", m.app.config.TTSTargetModel),
+		fmt.Sprintf("TTS Voice: %s", m.app.config.TTSTargetVoice),
+		fmt.Sprintf("STT Model: %s", m.app.config.STTTargetModel),
+		fmt.Sprintf("Response Verbosity: %d", m.app.config.ResponseVerbosity),
+		fmt.Sprintf("Speech Verbosity: %d", m.app.config.SpeechVerbosity),
+	}
 	encryptStr := "Off"
 	if m.app.config.EncryptSettings {
 		encryptStr = "On"
 	}
-	sb.WriteString(fmt.Sprintf("7. Encrypt Settings: %s\n", encryptStr))
-	sb.WriteString("\nUse arrow keys to navigate, Enter to edit values, 'v' to hear a sample TTS voice, and Esc to return.")
-	return sb.String()
+	settings = append(settings, fmt.Sprintf("Encrypt Settings: %s", encryptStr))
+	
+	// Render each setting, highlighting the selected one
+	var renderedItems []string
+	for i, setting := range settings {
+		if i == m.selectedSetting {
+			renderedItems = append(renderedItems, selectedStyle.Render("> "+setting))
+		} else {
+			renderedItems = append(renderedItems, "  "+setting)
+		}
+	}
+	
+	help := helpStyle.Render("↑/↓ to navigate, Enter to edit value, 'v' to sample TTS voice, Esc to return")
+	return lipgloss.JoinVertical(lipgloss.Center, title, "", strings.Join(renderedItems, "\n"), "", help)
 }
 
 func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
