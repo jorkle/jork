@@ -47,7 +47,12 @@ func DefaultConfig() *Config {
 		OpenAIAPIKey:    os.Getenv("OPENAI_API_KEY"),
 		
 		// AI Model Configuration
-		ClaudeModel:     "claude-3-5-sonnet-20241022",
+		ClaudeModel: func() string {
+			if v := os.Getenv("CLAUDE_MODEL"); v != "" {
+				return v
+			}
+			return "claude-3-5-sonnet-20241022"
+		}(),
 		OpenAITTSModel:  "tts-1",
 		OpenAITTSVoice:  "alloy",
 		OpenAISTTModel:  "whisper-1",

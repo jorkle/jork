@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +12,13 @@ import (
 )
 
 func main() {
+	// Parse command-line options
+	claudeModel := flag.String("claude-model", "", "Specify the Anthropic AI model for responses")
+	flag.Parse()
+	if *claudeModel != "" {
+		os.Setenv("CLAUDE_MODEL", *claudeModel)
+	}
+
 	// Create the application
 	application, err := app.NewApp()
 	if err != nil {
