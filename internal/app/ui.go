@@ -788,3 +788,49 @@ func (m *Model) renderSettingsEdit() string {
 	help := helpStyle.Render("Use ↑/↓ to navigate, Enter to confirm, Esc to cancel")
 	return lipgloss.JoinVertical(lipgloss.Center, title, "", strings.Join(items, "\n"), "", help)
 }
+ // handleAPIKeyInputKeys handles key input when in APIKeyInput state
+ func (m *Model) handleAPIKeyInputKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+ 	switch msg.String() {
+ 	case "esc", "q":
+ 		// Go back to main menu without changing API key
+ 		m.uiState = MainMenu
+ 		return m, nil
+ 	case "backspace":
+ 		if len(m.openaiKeyInput) > 0 {
+ 			m.openaiKeyInput = m.openaiKeyInput[:len(m.openaiKeyInput)-1]
+ 		}
+ 		return m, nil
+ 	case "enter":
+ 		// Transition to verifying state and run validation command
+ 		m.uiState = APIKeyVerifying
+ 		return m, ValidateAPIKeyCmd(m.app, m.openaiKeyInput)
+ 	default:
+ 		if len(msg.String()) == 1 {
+ 			m.openaiKeyInput += msg.String()
+ 		}
+ 		return m, nil
+ 	}
+ }
+ 
+ func (m *Model) handleAPIKeyVerifyingKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+ 	// During verification, ignore user keypresses
+ 	return m, nil
+ }
+ // renderAPIKeyInput renders the API Key input dialog
+ func (m *Model) renderAPIKeyInput() string {
+ 	title := titleStyle.Render("Enter OpenAI API Key")
+ 	inputField := inputStyle.Render(m.openaiKeyInput + "█")
+ 	var errorMsg string
+ 	if m.openaiKeyError != "" {
+ 		errorMsg = errorStyle.Render(m.openaiKeyError)
+ 	}
+ 	help := helpStyle.Render("Type your OpenAI API Key and press Enter. Esc to cancel.")
+ 	return lipgloss.JoinVertical(lipgloss.Center, title, "", inputField, "", errorMsg, "", help)
+ }
+ 
+ // renderAPIKeyVerifying renders the API Key verifying screen
+ func (m *Model) renderAPIKeyVerifying() string {
+ 	title := titleStyle.Render("Verifying API Key")
+ 	help := helpStyle.Render("Verifying and performing health checks, please wait...")
+ 	return lipgloss.JoinVertical(lipgloss.Center, title, "", help)
+ }
