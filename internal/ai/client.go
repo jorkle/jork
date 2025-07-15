@@ -123,10 +123,16 @@ func (c *OpenAIClient) ValidateAPIKey() error {
 		},
 	}
 
-	request := models.ClaudeRequest{
-		Model:     c.Model,
-		MaxTokens: 10,
-		Messages:  testMessages,
+	request := struct {
+		Model       string           `json:"model"`
+		Messages    []models.Message `json:"messages"`
+		Temperature float32          `json:"temperature"`
+		MaxTokens   int              `json:"max_tokens"`
+	}{
+		Model:       c.Model,
+		Messages:    testMessages,
+		Temperature: 0.7,
+		MaxTokens:   10,
 	}
 
 	requestBody, err := json.Marshal(request)

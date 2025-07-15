@@ -55,14 +55,14 @@ func DefaultConfig() *Config {
 		
 		// AI Model Configuration
 		ClaudeModel: func() string {
-			if v := os.Getenv("CLAUDE_MODEL"); v != "" {
+			if v := os.Getenv("OPENAI_MODEL"); v != "" {
 				return v
 			}
-			return "claude-3-5-sonnet-20241022"
+			return "gpt-4"
 		}(),
 		OpenAITTSModel:  "tts-1",
 		OpenAITTSVoice:  "alloy",
-		ConversationModel: "claude-3-5-sonnet-20241022",
+		ConversationModel: "gpt-4",
 		TTSTargetModel:    "tts-1",
 		TTSTargetVoice:    "alloy",
 		STTTargetModel:    "whisper-1",
@@ -94,10 +94,6 @@ func Load() (*Config, error) {
 	config := DefaultConfig()
 	
 	// Validate required API keys
-	if config.AnthropicAPIKey == "" {
-		return nil, fmt.Errorf("ANTHROPIC_API_KEY environment variable is required")
-	}
-	
 	if config.OpenAIAPIKey == "" {
 		return nil, fmt.Errorf("OPENAI_API_KEY environment variable is required")
 	}
@@ -116,10 +112,6 @@ func Load() (*Config, error) {
 
 // Validate checks if the configuration is valid
 func (c *Config) Validate() error {
-	if c.AnthropicAPIKey == "" {
-		return fmt.Errorf("Anthropic API key is required")
-	}
-	
 	if c.OpenAIAPIKey == "" {
 		return fmt.Errorf("OpenAI API key is required")
 	}
