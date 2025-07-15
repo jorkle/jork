@@ -554,6 +554,15 @@ type APIKeyValidationDoneMsg struct {
 	err error
 }
 
+func ValidateAPIKeyCmd(app *App, apiKey string) tea.Cmd {
+	return func() tea.Msg {
+		// Update the client's API key before validation
+		app.openaiClient.APIKey = apiKey
+		err := app.openaiClient.ValidateAPIKey()
+		return APIKeyValidationDoneMsg{err: err}
+	}
+}
+
 // processVoiceInput creates a command to process voice input
 func (m *Model) processVoiceInput(audioData *models.AudioData) tea.Cmd {
 	return ProcessVoiceCmd(m.app, audioData)
