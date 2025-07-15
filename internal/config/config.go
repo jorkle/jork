@@ -22,7 +22,7 @@ type Config struct {
 	TTSTargetVoice    string
 	STTTargetModel    string
 	ResponseVerbosity int
-	SpeechVerbosity   int
+	SpeechSpeed       int
 	EncryptSettings   bool
 	OpenAISTTModel  string
 	
@@ -67,7 +67,7 @@ func DefaultConfig() *Config {
 		TTSTargetVoice:    "alloy",
 		STTTargetModel:    "whisper-1",
 		ResponseVerbosity: 2,
-		SpeechVerbosity:   2,
+		SpeechSpeed:       2,
 		EncryptSettings:   false,
 		OpenAISTTModel:  "whisper-1",
 		

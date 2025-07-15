@@ -594,7 +594,7 @@ func (m *Model) renderSettings() string {
 		fmt.Sprintf("TTS Voice: %s", m.app.config.TTSTargetVoice),
 		fmt.Sprintf("STT Model: %s", m.app.config.STTTargetModel),
 		fmt.Sprintf("Response Verbosity: %d", m.app.config.ResponseVerbosity),
-		fmt.Sprintf("Speech Verbosity: %d", m.app.config.SpeechVerbosity),
+		fmt.Sprintf("Speech Speed: %d", m.app.config.SpeechSpeed),
 	}
 	encryptStr := "Off"
 	if m.app.config.EncryptSettings {
@@ -667,7 +667,7 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				m.editTitle = "Select Response Verbosity"
 				m.editOptions = []string{"1", "2", "3"}
 			case 5:
-				m.editTitle = "Select Speech Verbosity"
+				m.editTitle = "Select Speech Speed"
 				m.editOptions = []string{"1", "2", "3"}
 			}
 		}
@@ -752,7 +752,7 @@ func (m *Model) handleSettingsEditKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 		case 5:
 			if val, err := strconv.Atoi(m.editOptions[m.cursor]); err == nil {
-				m.app.config.SpeechVerbosity = val
+				m.app.config.SpeechSpeed = val
 			}
 		case 7:
 			m.app.config.OpenAIAPIKey = m.editOptions[m.cursor]
