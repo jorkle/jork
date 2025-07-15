@@ -558,6 +558,7 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 var (
+	titleStyle = lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("86")).
 		MarginBottom(1)
