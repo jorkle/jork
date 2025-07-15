@@ -55,21 +55,35 @@ func (c *OpenAIClient) GenerateResponse(
 		Content: formattedInput,
 	})
 
-	// Create the request for OpenAI Chat Completions
-	request := struct {
-		Model               string           `json:"model"`
-		Messages            []models.Message `json:"messages"`
-		Temperature         float32          `json:"temperature"`
-		MaxCompletionTokens int              `json:"max_completion_tokens"`
-	}{
-		Model:               c.Model,
-		Messages:            messages,
-		Temperature:         0.7,
-		MaxCompletionTokens: 1000,
+	var requestBody []byte
+	var err error
+	if strings.Contains(strings.ToLower(c.Model), "claude") {
+		req := struct {
+			Model       string           `json:"model"`
+			Messages    []models.Message `json:"messages"`
+			Temperature float32          `json:"temperature"`
+			MaxTokens   int              `json:"max_tokens"`
+		}{
+			Model:       c.Model,
+			Messages:    messages,
+			Temperature: 0.7,
+			MaxTokens:   1000,
+		}
+		requestBody, err = json.Marshal(req)
+	} else {
+		req := struct {
+			Model               string           `json:"model"`
+			Messages            []models.Message `json:"messages"`
+			Temperature         float32          `json:"temperature"`
+			MaxCompletionTokens int              `json:"max_completion_tokens"`
+		}{
+			Model:               c.Model,
+			Messages:            messages,
+			Temperature:         0.7,
+			MaxCompletionTokens: 1000,
+		}
+		requestBody, err = json.Marshal(req)
 	}
-
-	// Marshal the request to JSON
-	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal request: %w", err)
 	}
@@ -125,19 +139,34 @@ func (c *OpenAIClient) ValidateAPIKey() error {
 		},
 	}
 
-	request := struct {
-		Model               string           `json:"model"`
-		Messages            []models.Message `json:"messages"`
-		Temperature         float32          `json:"temperature"`
-		MaxCompletionTokens int              `json:"max_completion_tokens"`
-	}{
-		Model:               c.Model,
-		Messages:            testMessages,
-		Temperature:         0.7,
-		MaxCompletionTokens: 10,
+	var requestBody []byte
+	if strings.Contains(strings.ToLower(c.Model), "claude") {
+		req := struct {
+			Model       string           `json:"model"`
+			Messages    []models.Message `json:"messages"`
+			Temperature float32          `json:"temperature"`
+			MaxTokens   int              `json:"max_tokens"`
+		}{
+			Model:       c.Model,
+			Messages:    testMessages,
+			Temperature: 0.7,
+			MaxTokens:   10,
+		}
+		requestBody, err = json.Marshal(req)
+	} else {
+		req := struct {
+			Model               string           `json:"model"`
+			Messages            []models.Message `json:"messages"`
+			Temperature         float32          `json:"temperature"`
+			MaxCompletionTokens int              `json:"max_completion_tokens"`
+		}{
+			Model:               c.Model,
+			Messages:            testMessages,
+			Temperature:         0.7,
+			MaxCompletionTokens: 10,
+		}
+		requestBody, err = json.Marshal(req)
 	}
-
-	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return fmt.Errorf("failed to marshal test request: %w", err)
 	}
