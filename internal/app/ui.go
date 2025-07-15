@@ -23,6 +23,8 @@ const (
 	Processing
 	Settings     // NEW: Settings menu state
 	SettingsEdit // NEW: Settings edit dialog state
+	APIKeyInput  // NEW: API Key input dialog state
+	APIKeyVerifying // NEW: API Key verifying state
 )
 
 // Model represents the Bubbletea model
@@ -44,6 +46,8 @@ type Model struct {
 	isSamplingVoice bool // NEW: flag for TTS voice sample playback
 	editTitle       string
 	editOptions     []string
+	openaiKeyInput  string // NEW: for OpenAI API key input
+	openaiKeyError  string // NEW: for displaying API key error
 }
 
 // NewModel creates a new Bubbletea model
@@ -115,6 +119,15 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.error = ""
 		}
 		return m, nil
+	case APIKeyValidationDoneMsg:
+		if msg.err != nil {
+			m.openaiKeyError = "Validation failed: " + msg.err.Error()
+			m.uiState = APIKeyInput
+		} else {
+			m.app.config.OpenAIAPIKey = m.openaiKeyInput
+			m.uiState = MainMenu
+		}
+		return m, nil
 	}
 
 	return m, nil
@@ -139,6 +152,10 @@ func (m *Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleSettingsKeys(msg)
 	case SettingsEdit:
 		return m.handleSettingsEditKeys(msg)
+	case APIKeyInput:
+		return m.handleAPIKeyInputKeys(msg)
+	case APIKeyVerifying:
+		return m.handleAPIKeyVerifyingKeys(msg)
 	default:
 		return m, nil
 	}
@@ -315,6 +332,10 @@ func (m *Model) View() string {
 		return m.renderSettings()
 	case SettingsEdit:
 		return m.renderSettingsEdit()
+	case APIKeyInput:
+		return m.renderAPIKeyInput()
+	case APIKeyVerifying:
+		return m.renderAPIKeyVerifying()
 	default:
 		return "Unknown state"
 	}
@@ -522,11 +543,15 @@ type processingDoneMsg struct {
 	error    string
 }
 
-// tickRecording creates a command to update recording time
 func (m *Model) tickRecording() tea.Cmd {
 	return tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg {
 		return recordingTickMsg{duration: m.recordingTime + 100*time.Millisecond}
 	})
+}
+
+// APIKeyValidationDoneMsg indicates result of API key validation
+type APIKeyValidationDoneMsg struct {
+	err error
 }
 
 // processVoiceInput creates a command to process voice input
