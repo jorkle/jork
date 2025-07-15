@@ -107,17 +107,26 @@ func (c *OpenAIClient) GenerateResponse(
 		return "", fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
-	// Parse the response
+	// First, try to parse the response as an OpenAI ChatCompletion response
+	var chatResponse struct {
+		Choices []struct {
+			Message struct {
+				Role    string `json:"role"`
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+	if err := json.Unmarshal(body, &chatResponse); err == nil && len(chatResponse.Choices) > 0 {
+		return chatResponse.Choices[0].Message.Content, nil
+	}
+	// Fallback: try to parse as a ClaudeResponse
 	var claudeResponse models.ClaudeResponse
 	if err := json.Unmarshal(body, &claudeResponse); err != nil {
 		return "", fmt.Errorf("failed to unmarshal response: %w", err)
 	}
-
-	// Extract the text content
 	if len(claudeResponse.Content) == 0 {
 		return "", fmt.Errorf("no content in response")
 	}
-
 	return claudeResponse.Content[0].Text, nil
 }
 
