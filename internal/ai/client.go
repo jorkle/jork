@@ -58,26 +58,22 @@ func (c *OpenAIClient) GenerateResponse(
 	var err error
 	if strings.Contains(strings.ToLower(c.Model), "claude") {
 		req := struct {
-			Model               string           `json:"model"`
-			Messages            []models.Message `json:"messages"`
-			MaxCompletionTokens int              `json:"max_completion_tokens"`
+			Model    string           `json:"model"`
+			Messages []models.Message `json:"messages"`
 		}{
-			Model:               c.Model,
-			Messages:            messages,
-			MaxCompletionTokens: 1000,
+			Model:    c.Model,
+			Messages: messages,
 		}
 		requestBody, err = json.Marshal(req)
 	} else {
 		req := struct {
-			Model               string           `json:"model"`
-			Messages            []models.Message `json:"messages"`
-			Temperature         float32          `json:"temperature"`
-			MaxCompletionTokens int              `json:"max_completion_tokens"`
+			Model       string           `json:"model"`
+			Messages    []models.Message `json:"messages"`
+			Temperature float32          `json:"temperature"`
 		}{
-			Model:               c.Model,
-			Messages:            messages,
-			Temperature:         0.7,
-			MaxCompletionTokens: 1000,
+			Model:       c.Model,
+			Messages:    messages,
+			Temperature: 0.7,
 		}
 		requestBody, err = json.Marshal(req)
 	}
@@ -140,26 +136,22 @@ func (c *OpenAIClient) ValidateAPIKey() error {
 	var err error
 	if strings.Contains(strings.ToLower(c.Model), "claude") {
 		req := struct {
-			Model               string           `json:"model"`
-			Messages            []models.Message `json:"messages"`
-			MaxCompletionTokens int              `json:"max_completion_tokens"`
+			Model    string           `json:"model"`
+			Messages []models.Message `json:"messages"`
 		}{
-			Model:               c.Model,
-			Messages:            testMessages,
-			MaxCompletionTokens: 10,
+			Model:    c.Model,
+			Messages: testMessages,
 		}
 		requestBody, err = json.Marshal(req)
 	} else {
 		req := struct {
-			Model               string           `json:"model"`
-			Messages            []models.Message `json:"messages"`
-			Temperature         float32          `json:"temperature"`
-			MaxCompletionTokens int              `json:"max_completion_tokens"`
+			Model       string           `json:"model"`
+			Messages    []models.Message `json:"messages"`
+			Temperature float32          `json:"temperature"`
 		}{
-			Model:               c.Model,
-			Messages:            testMessages,
-			Temperature:         0.7,
-			MaxCompletionTokens: 10,
+			Model:       c.Model,
+			Messages:    testMessages,
+			Temperature: 0.7,
 		}
 		requestBody, err = json.Marshal(req)
 	}
