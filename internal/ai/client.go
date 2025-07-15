@@ -11,7 +11,7 @@ import (
 	"github.com/jorkle/jork/internal/models"
 )
 
-// ClaudeClient handles communication with the Anthropic Claude API
+ // OpenAIClient handles communication with the OpenAI API
 type OpenAIClient struct {
 	APIKey     string
 	Model      string
@@ -32,7 +32,7 @@ func NewOpenAIClient(apiKey, model string) *OpenAIClient {
 }
 
 // GenerateResponse sends a request to Claude and returns the response
-func (c *ClaudeClient) GenerateResponse(
+func (c *OpenAIClient) GenerateResponse(
 	userInput string,
 	knowledgeLevel models.KnowledgeLevel,
 	mode models.CommunicationMode,
@@ -115,7 +115,7 @@ func (c *ClaudeClient) GenerateResponse(
 }
 
 // ValidateAPIKey checks if the API key is valid by making a simple request
-func (c *ClaudeClient) ValidateAPIKey() error {
+func (c *OpenAIClient) ValidateAPIKey() error {
 	testMessages := []models.Message{
 		{
 			Role:    "user",
