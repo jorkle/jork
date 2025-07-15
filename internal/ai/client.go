@@ -199,8 +199,17 @@ func (c *OpenAIClient) FetchAvailableModels() ([]string, error) {
 		if matched, _ := regexp.MatchString(`\d{4}-\d{2}-\d{2}`, id); matched {
 			continue
 		}
-		// Skip models not suitable for text-to-text communication (e.g. Whisper models)
-		if strings.Contains(id, "whisper") {
+		// Skip models not suitable for text-to-text communication (e.g. Whisper models, DALL·E, embeddings, TTS, moderation, realtime, research, image, transcribe, or audio)
+		if strings.Contains(id, "whisper") ||
+			strings.Contains(id, "dalle") ||
+			strings.Contains(id, "embedding") ||
+			strings.Contains(id, "tts") ||
+			strings.Contains(id, "moderation") ||
+			strings.Contains(id, "realtime") ||
+			strings.Contains(id, "research") ||
+			strings.Contains(id, "image") ||
+			strings.Contains(id, "transcribe") ||
+			strings.Contains(id, "audio") {
 			continue
 		}
 		models = append(models, id)
