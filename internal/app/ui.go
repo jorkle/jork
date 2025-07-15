@@ -576,6 +576,16 @@ func (m *Model) renderSettings() string {
 
 func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
+	case "up", "k":
+		if m.selectedSetting > 0 {
+			m.selectedSetting--
+		}
+		return m, nil
+	case "down", "j":
+		if m.selectedSetting < 6 {
+			m.selectedSetting++
+		}
+		return m, nil
 	case "esc", "q":
 		m.uiState = MainMenu
 		return m, nil
@@ -599,8 +609,9 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.error = "Editing not implemented for this setting"
 		}
 		return m, nil
+	default:
+		return m, nil
 	}
-	return m, nil
 }
 
 var (
