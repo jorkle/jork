@@ -58,13 +58,13 @@ func (c *OpenAIClient) GenerateResponse(
 	var err error
 	if strings.Contains(strings.ToLower(c.Model), "claude") {
 		req := struct {
-			Model     string           `json:"model"`
-			Messages  []models.Message `json:"messages"`
-			MaxTokens int              `json:"max_tokens"`
+			Model               string           `json:"model"`
+			Messages            []models.Message `json:"messages"`
+			MaxCompletionTokens int              `json:"max_completion_tokens"`
 		}{
-			Model:     c.Model,
-			Messages:  messages,
-			MaxTokens: 1000,
+			Model:               c.Model,
+			Messages:            messages,
+			MaxCompletionTokens: 1000,
 		}
 		requestBody, err = json.Marshal(req)
 	} else {
@@ -140,13 +140,13 @@ func (c *OpenAIClient) ValidateAPIKey() error {
 	var err error
 	if strings.Contains(strings.ToLower(c.Model), "claude") {
 		req := struct {
-			Model     string           `json:"model"`
-			Messages  []models.Message `json:"messages"`
-			MaxTokens int              `json:"max_tokens"`
+			Model               string           `json:"model"`
+			Messages            []models.Message `json:"messages"`
+			MaxCompletionTokens int              `json:"max_completion_tokens"`
 		}{
-			Model:     c.Model,
-			Messages:  testMessages,
-			MaxTokens: 10,
+			Model:               c.Model,
+			Messages:            testMessages,
+			MaxCompletionTokens: 10,
 		}
 		requestBody, err = json.Marshal(req)
 	} else {
