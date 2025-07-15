@@ -56,7 +56,18 @@ func (c *OpenAIClient) GenerateResponse(
 	})
 	var requestBody []byte
 	var err error
-	if strings.Contains(strings.ToLower(c.Model), "gpt") {
+	if strings.Contains(strings.ToLower(c.Model), "claude") {
+		req := struct {
+			Model     string           `json:"model"`
+			Messages  []models.Message `json:"messages"`
+			MaxTokens int              `json:"max_tokens"`
+		}{
+			Model:     c.Model,
+			Messages:  messages,
+			MaxTokens: 1000,
+		}
+		requestBody, err = json.Marshal(req)
+	} else {
 		req := struct {
 			Model               string           `json:"model"`
 			Messages            []models.Message `json:"messages"`
@@ -67,17 +78,6 @@ func (c *OpenAIClient) GenerateResponse(
 			Messages:            messages,
 			Temperature:         0.7,
 			MaxCompletionTokens: 1000,
-		}
-		requestBody, err = json.Marshal(req)
-	} else {
-		req := struct {
-			Model     string           `json:"model"`
-			Messages  []models.Message `json:"messages"`
-			MaxTokens int              `json:"max_tokens"`
-		}{
-			Model:     c.Model,
-			Messages:  messages,
-			MaxTokens: 1000,
 		}
 		requestBody, err = json.Marshal(req)
 	}
@@ -138,7 +138,18 @@ func (c *OpenAIClient) ValidateAPIKey() error {
 	
 	var requestBody []byte
 	var err error
-	if strings.Contains(strings.ToLower(c.Model), "gpt") {
+	if strings.Contains(strings.ToLower(c.Model), "claude") {
+		req := struct {
+			Model     string           `json:"model"`
+			Messages  []models.Message `json:"messages"`
+			MaxTokens int              `json:"max_tokens"`
+		}{
+			Model:     c.Model,
+			Messages:  testMessages,
+			MaxTokens: 10,
+		}
+		requestBody, err = json.Marshal(req)
+	} else {
 		req := struct {
 			Model               string           `json:"model"`
 			Messages            []models.Message `json:"messages"`
@@ -149,17 +160,6 @@ func (c *OpenAIClient) ValidateAPIKey() error {
 			Messages:            testMessages,
 			Temperature:         0.7,
 			MaxCompletionTokens: 10,
-		}
-		requestBody, err = json.Marshal(req)
-	} else {
-		req := struct {
-			Model     string           `json:"model"`
-			Messages  []models.Message `json:"messages"`
-			MaxTokens int              `json:"max_tokens"`
-		}{
-			Model:     c.Model,
-			Messages:  testMessages,
-			MaxTokens: 10,
 		}
 		requestBody, err = json.Marshal(req)
 	}
