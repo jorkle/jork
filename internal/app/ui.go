@@ -21,6 +21,7 @@ const (
 	Recording
 	Processing
 	Settings       // NEW: Settings menu state
+	SettingsEdit   // NEW: Settings edit dialog state
 )
 
 // Model represents the Bubbletea model
@@ -40,6 +41,8 @@ type Model struct {
 	width           int
 	height          int
 	isSamplingVoice bool  // NEW: flag for TTS voice sample playback
+	editTitle       string
+	editOptions     []string
 }
 
 // NewModel creates a new Bubbletea model
@@ -133,6 +136,8 @@ func (m *Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleProcessingKeys(msg)
 	case Settings:
 		return m.handleSettingsKeys(msg)
+	case SettingsEdit:
+		return m.handleSettingsEditKeys(msg)
 	default:
 		return m, nil
 	}
@@ -307,6 +312,8 @@ func (m *Model) View() string {
 		return m.renderProcessing()
 	case Settings:
 		return m.renderSettings()
+	case SettingsEdit:
+		return m.renderSettingsEdit()
 	default:
 		return "Unknown state"
 	}
@@ -605,8 +612,29 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if m.selectedSetting == 6 {
 			m.app.config.EncryptSettings = !m.app.config.EncryptSettings
 		} else {
-			// For other settings, indicate that editing is not implemented.
-			m.error = "Editing not implemented for this setting"
+			// For other settings, enter the editing dialog
+			switch m.selectedSetting {
+			case 0:
+				m.editTitle = "Select Conversation Model"
+				m.editOptions = []string{"claude-3-5-sonnet-20241022", "gpt-4"}
+			case 1:
+				m.editTitle = "Select TTS Model"
+				m.editOptions = []string{"tts-1", "tts-2"}
+			case 2:
+				m.editTitle = "Select TTS Voice"
+				m.editOptions = []string{"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
+			case 3:
+				m.editTitle = "Select STT Model"
+				m.editOptions = []string{"whisper-1", "whisper-2"}
+			case 4:
+				m.editTitle = "Select Response Verbosity"
+				m.editOptions = []string{"1", "2", "3"}
+			case 5:
+				m.editTitle = "Select Speech Verbosity"
+				m.editOptions = []string{"1", "2", "3"}
+			}
+			m.cursor = 0
+			m.uiState = SettingsEdit
 		}
 		return m, nil
 	default:
