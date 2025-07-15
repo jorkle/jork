@@ -20,6 +20,7 @@ type App struct {
 	config       *config.Config
 	claudeClient *ai.ClaudeClient
 	ttsClient    *ai.TTSClient
+	sttClient    *ai.STTClient
 	recorder     *audio.Recorder
 	player       *audio.Player
 	state        *models.AppState
@@ -35,6 +36,7 @@ func NewApp() (*App, error) {
 	// Initialize AI clients
 	claudeClient := ai.NewClaudeClient(cfg.AnthropicAPIKey, cfg.ClaudeModel)
 	ttsClient := ai.NewTTSClient(cfg.OpenAIAPIKey, cfg.OpenAITTSModel, cfg.OpenAITTSVoice)
+	sttClient := ai.NewSTTClient(cfg.OpenAIAPIKey, cfg.OpenAISTTModel)
 
 	// Initialize audio components
 	recorder, err := audio.NewRecorder(cfg.SampleRate, 1) // mono
@@ -58,6 +60,7 @@ func NewApp() (*App, error) {
 		config:       cfg,
 		claudeClient: claudeClient,
 		ttsClient:    ttsClient,
+		sttClient:    sttClient,
 		recorder:     recorder,
 		player:       player,
 		state:        state,
@@ -72,7 +75,11 @@ func (a *App) Run() error {
 	}
 
 	if err := a.ttsClient.ValidateAPIKey(); err != nil {
-		return fmt.Errorf("invalid OpenAI API key: %w", err)
+		return fmt.Errorf("invalid OpenAI TTS API key: %w", err)
+	}
+
+	if err := a.sttClient.ValidateAPIKey(); err != nil {
+		return fmt.Errorf("invalid OpenAI STT API key: %w", err)
 	}
 
 	// Create and run the Bubbletea program
@@ -139,9 +146,11 @@ func (a *App) ProcessVoiceInput(audioData *models.AudioData) (string, error) {
 	}
 	defer os.Remove(tempFile)
 
-	// For now, we'll simulate speech-to-text conversion
-	// In a real implementation, you'd use a speech-to-text service
-	transcription := \"[Voice input recorded - speech-to-text conversion would happen here]\"
+	// Convert speech to text using OpenAI Whisper
+	transcription, err := a.sttClient.SpeechToText(tempFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to transcribe audio: %w", err)
+	}
 
 	// Process the transcription as text
 	return a.ProcessTextInput(transcription)

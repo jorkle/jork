@@ -17,6 +17,7 @@ type Config struct {
 	ClaudeModel     string
 	OpenAITTSModel  string
 	OpenAITTSVoice  string
+	OpenAISTTModel  string
 	
 	// Audio Configuration
 	SampleRate      int
@@ -49,6 +50,7 @@ func DefaultConfig() *Config {
 		ClaudeModel:     "claude-3-5-sonnet-20241022",
 		OpenAITTSModel:  "tts-1",
 		OpenAITTSVoice:  "alloy",
+		OpenAISTTModel:  "whisper-1",
 		
 		// Audio Configuration
 		SampleRate:      44100,
