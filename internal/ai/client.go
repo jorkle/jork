@@ -57,15 +57,15 @@ func (c *OpenAIClient) GenerateResponse(
 
 	// Create the request for OpenAI Chat Completions
 	request := struct {
-		Model       string           `json:"model"`
-		Messages    []models.Message `json:"messages"`
-		Temperature float32          `json:"temperature"`
-		MaxTokens   int              `json:"max_tokens"`
+		Model               string           `json:"model"`
+		Messages            []models.Message `json:"messages"`
+		Temperature         float32          `json:"temperature"`
+		MaxCompletionTokens int              `json:"max_completion_tokens"`
 	}{
-		Model:       c.Model,
-		Messages:    messages,
-		Temperature: 0.7,
-		MaxTokens:   1000,
+		Model:               c.Model,
+		Messages:            messages,
+		Temperature:         0.7,
+		MaxCompletionTokens: 1000,
 	}
 
 	// Marshal the request to JSON
@@ -126,15 +126,15 @@ func (c *OpenAIClient) ValidateAPIKey() error {
 	}
 
 	request := struct {
-		Model       string           `json:"model"`
-		Messages    []models.Message `json:"messages"`
-		Temperature float32          `json:"temperature"`
-		MaxTokens   int              `json:"max_tokens"`
+		Model               string           `json:"model"`
+		Messages            []models.Message `json:"messages"`
+		Temperature         float32          `json:"temperature"`
+		MaxCompletionTokens int              `json:"max_completion_tokens"`
 	}{
-		Model:       c.Model,
-		Messages:    testMessages,
-		Temperature: 0.7,
-		MaxTokens:   10,
+		Model:               c.Model,
+		Messages:            testMessages,
+		Temperature:         0.7,
+		MaxCompletionTokens: 10,
 	}
 
 	requestBody, err := json.Marshal(request)
