@@ -156,6 +156,12 @@ func (m *Model) handleMainMenuKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		// Show conversation history
 		m.message = m.formatConversationHistory()
 		return m, nil
+	case "5":
+		m.uiState = Settings
+		return m, nil
+	case "6":
+		m.uiState = StartupWizard
+		return m, nil
 	}
 	return m, nil
 }
@@ -302,6 +308,10 @@ func (m *Model) View() string {
 		return m.renderRecording()
 	case Processing:
 		return m.renderProcessing()
+	case Settings:
+		return m.renderSettings()
+	case StartupWizard:
+		return m.renderStartupWizard()
 	default:
 		return "Unknown state"
 	}
@@ -321,6 +331,8 @@ func (m *Model) renderMainMenu() string {
 2. Select Knowledge Level
 3. Start Conversation
 4. View Conversation History
+5. Settings
+6. Setup Wizard
 
 Press 'q' to quit`
 
@@ -475,6 +487,15 @@ func (m *Model) renderProcessing() string {
 		"",
 		help,
 	)
+}
+
+// renderStartupWizard renders the initial configuration wizard UI
+func (m *Model) renderStartupWizard() string {
+	var sb strings.Builder
+	sb.WriteString("Welcome to the JORK Setup Wizard\n\n")
+	sb.WriteString("Please follow the instructions to configure your API keys, AI models, verbosity settings, and encryption.\n")
+	sb.WriteString("Use arrow keys to navigate, Enter to select, Esc to cancel.\n")
+	return sb.String()
 }
 
 // formatConversationHistory formats the conversation history for display
