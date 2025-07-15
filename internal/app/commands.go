@@ -96,8 +96,12 @@ func ProcessVoiceCmd(app *App, audioData interface{}) tea.Cmd {
 				}
 			}
 			
+			msgResponse := response
+			if app.state.CurrentMode == models.VoiceToVoice {
+				msgResponse = "[Voice response played]"
+			}
 			return ProcessingCompletedMsg{
-				Response: response,
+				Response: msgResponse,
 				Error:    err,
 			}
 		}
