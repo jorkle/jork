@@ -74,7 +74,7 @@ func (t *TTSClient) TextToSpeech(text string, outputPath string) error {
 	default:
 		req.Voice = openai.VoiceAlloy
 	}
-	req.Speed = t.speed
+	req.Speed = float64(t.speed)
 
 	// Make the request
 	response, err := t.client.CreateSpeech(ctx, req)
