@@ -1,0 +1,159 @@
+package ai
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+
+	"github.com/jorkle/jork/internal/models"
+)
+
+// ClaudeClient handles communication with the Anthropic Claude API
+type ClaudeClient struct {
+	APIKey     string
+	Model      string
+	HTTPClient *http.Client
+	BaseURL    string
+}
+
+// NewClaudeClient creates a new Claude API client
+func NewClaudeClient(apiKey, model string) *ClaudeClient {
+	return &ClaudeClient{
+		APIKey:  apiKey,
+		Model:   model,
+		BaseURL: "https://api.anthropic.com/v1/messages",
+		HTTPClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+	}
+}
+
+// GenerateResponse sends a request to Claude and returns the response
+func (c *ClaudeClient) GenerateResponse(
+	userInput string,
+	knowledgeLevel models.KnowledgeLevel,
+	mode models.CommunicationMode,
+	conversationHistory []models.ConversationEntry,
+	topic string,
+) (string, error) {
+	// Build the system prompt
+	systemPrompt := GetSystemPrompt(knowledgeLevel, topic)
+	systemPrompt += GetModeInstructions(mode)
+
+	// Build conversation context
+	messages := GetConversationContext(conversationHistory, 10)
+
+	// Add the current user input
+	formattedInput := FormatUserInput(userInput, mode)
+	messages = append(messages, models.Message{
+		Role:    "user",
+		Content: formattedInput,
+	})
+
+	// Create the request
+	request := models.ClaudeRequest{
+		Model:     c.Model,
+		MaxTokens: 1000,
+		Messages:  messages,
+		System:    systemPrompt,
+	}
+
+	// Marshal the request to JSON
+	requestBody, err := json.Marshal(request)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// Create HTTP request
+	req, err := http.NewRequest("POST", c.BaseURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-api-key", c.APIKey)
+	req.Header.Set("anthropic-version", "2023-06-01")
+
+	// Send the request
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Read the response
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response: %w", err)
+	}
+
+	// Check for HTTP errors
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	// Parse the response
+	var claudeResponse models.ClaudeResponse
+	if err := json.Unmarshal(body, &claudeResponse); err != nil {
+		return "", fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	// Extract the text content
+	if len(claudeResponse.Content) == 0 {
+		return "", fmt.Errorf("no content in response")
+	}
+
+	return claudeResponse.Content[0].Text, nil
+}
+
+// ValidateAPIKey checks if the API key is valid by making a simple request
+func (c *ClaudeClient) ValidateAPIKey() error {
+	testMessages := []models.Message{
+		{
+			Role:    "user",
+			Content: "Hello",
+		},
+	}
+
+	request := models.ClaudeRequest{
+		Model:     c.Model,
+		MaxTokens: 10,
+		Messages:  testMessages,
+	}
+
+	requestBody, err := json.Marshal(request)
+	if err != nil {
+		return fmt.Errorf("failed to marshal test request: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", c.BaseURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return fmt.Errorf("failed to create test request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-api-key", c.APIKey)
+	req.Header.Set("anthropic-version", "2023-06-01")
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send test request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		return fmt.Errorf("invalid API key")
+	}
+
+	if resp.StatusCode >= 400 {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("API validation failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	return nil
+}
+
