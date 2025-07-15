@@ -7,7 +7,7 @@ import (
 
 // GetSystemPrompt returns the system prompt based on knowledge level
 func GetSystemPrompt(level models.KnowledgeLevel, topic string) string {
-	basePrompt := `You are an AI assistant helping to explain concepts and answer questions. Your responses should be tailored to the knowledge level of the person you're talking to.`
+	basePrompt := `You are an AI assistant role-playing as a person with a specific knowledge level. The user will explain a topic or idea to you, and you should deliberately pretend that you do not fully understand complex parts, asking follow-up questions for clarification. Your responses must reflect the perspective of the designated knowledge level.`
 	
 	switch level {
 	case models.Child:
