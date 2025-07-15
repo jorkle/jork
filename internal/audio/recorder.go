@@ -87,35 +87,31 @@ func (r *Recorder) StartRecording() error {
 // StopRecording stops recording and returns the recorded audio data
 func (r *Recorder) StopRecording() (*models.AudioData, error) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
 	if !r.isRecording {
+		r.mutex.Unlock()
 		return nil, fmt.Errorf("no recording in progress")
 	}
+	r.isRecording = false
+	r.mutex.Unlock()
 
-	// Stop the stream
 	if err := r.stream.Stop(); err != nil {
 		return nil, fmt.Errorf("failed to stop audio stream: %w", err)
 	}
 
-	// Close the stream
 	if err := r.stream.Close(); err != nil {
 		return nil, fmt.Errorf("failed to close audio stream: %w", err)
 	}
 
-	r.isRecording = false
-
-	// Calculate duration
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 	duration := time.Duration(len(r.buffer)/r.channels) * time.Second / time.Duration(r.sampleRate)
 
-	// Create audio data
 	audioData := &models.AudioData{
 		Data:       make([]float32, len(r.buffer)),
 		SampleRate: r.sampleRate,
 		Duration:   duration,
 	}
 
-	// Copy the buffer data
 	copy(audioData.Data, r.buffer)
 
 	return audioData, nil
