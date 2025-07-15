@@ -687,3 +687,58 @@ var (
 		Bold(true)
 )
 
+import "strconv"
+
+func (m *Model) handleSettingsEditKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "up", "k":
+		if m.cursor > 0 {
+			m.cursor--
+		}
+		return m, nil
+	case "down", "j":
+		if m.cursor < len(m.editOptions)-1 {
+			m.cursor++
+		}
+		return m, nil
+	case "enter":
+		switch m.selectedSetting {
+		case 0:
+			m.app.config.ConversationModel = m.editOptions[m.cursor]
+		case 1:
+			m.app.config.TTSTargetModel = m.editOptions[m.cursor]
+		case 2:
+			m.app.config.TTSTargetVoice = m.editOptions[m.cursor]
+		case 3:
+			m.app.config.STTTargetModel = m.editOptions[m.cursor]
+		case 4:
+			if val, err := strconv.Atoi(m.editOptions[m.cursor]); err == nil {
+				m.app.config.ResponseVerbosity = val
+			}
+		case 5:
+			if val, err := strconv.Atoi(m.editOptions[m.cursor]); err == nil {
+				m.app.config.SpeechVerbosity = val
+			}
+		}
+		m.uiState = Settings
+		return m, nil
+	case "esc", "q":
+		m.uiState = Settings
+		return m, nil
+	default:
+		return m, nil
+	}
+}
+func (m *Model) renderSettingsEdit() string {
+	title := titleStyle.Render(m.editTitle)
+	var items []string
+	for i, option := range m.editOptions {
+		if i == m.cursor {
+			items = append(items, selectedStyle.Render("> "+option))
+		} else {
+			items = append(items, "  "+option)
+		}
+	}
+	help := helpStyle.Render("Use ↑/↓ to navigate, Enter to confirm, Esc to cancel")
+	return lipgloss.JoinVertical(lipgloss.Center, title, "", strings.Join(items, "\n"), "", help)
+}
