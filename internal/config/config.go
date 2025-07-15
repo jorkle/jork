@@ -94,6 +94,12 @@ func DefaultConfig() *Config {
 // Load loads configuration from environment variables and validates it
 func Load() (*Config, error) {
 	config := DefaultConfig()
+	configFile := filepath.Join(config.ConfigDir, "config.json")
+	if _, err := os.Stat(configFile); err == nil {
+		if loaded, err := LoadFromFile(configFile); err == nil {
+			config = loaded
+		}
+	}
 	
 	// Validate required API keys
 	if config.OpenAIAPIKey == "" {
@@ -129,3 +135,25 @@ func (c *Config) Validate() error {
 	return nil
 }
 
+import "encoding/json"
+
+func (c *Config) Save() error {
+	configFile := filepath.Join(c.ConfigDir, "config.json")
+	data, err := json.MarshalIndent(c, "", "    ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(configFile, data, 0644)
+}
+
+func LoadFromFile(configFile string) (*Config, error) {
+	data, err := os.ReadFile(configFile)
+	if err != nil {
+		return nil, err
+	}
+	var cfg Config
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}

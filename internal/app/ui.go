@@ -816,6 +816,10 @@ func (m *Model) handleSettingsEditKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				m.error = "Health Check passed"
 			}
 		}
+		// Save the updated settings to disk.
+		if err := m.app.config.Save(); err != nil {
+			m.error = "Failed to save settings: " + err.Error()
+		}
 		m.uiState = Settings
 		return m, nil
 	case "esc", "q":
