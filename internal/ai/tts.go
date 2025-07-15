@@ -34,7 +34,7 @@ func (t *TTSClient) TextToSpeech(text string, outputPath string) error {
 
 	// Create the TTS request
 	req := openai.CreateSpeechRequest{
-		Model: openai.TTSModel1,
+		Model: openai.SpeechModel(t.model),
 		Input: text,
 		Voice: openai.VoiceAlloy, // Default voice, can be made configurable
 	}
