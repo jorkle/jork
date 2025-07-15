@@ -8,7 +8,6 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/jorkle/jork/internal/ai"
 	"github.com/jorkle/jork/internal/audio"
 	"github.com/jorkle/jork/internal/config"
@@ -223,7 +222,7 @@ func (a *App) PlayAudio(filename string) error {
 	}
 
 	a.state.IsPlaying = true
-	
+
 	// Start a goroutine to monitor playback status
 	go func() {
 		a.player.WaitForPlayback()
@@ -304,4 +303,3 @@ func (a *App) cleanupTempFiles() error {
 		return nil
 	})
 }
-
