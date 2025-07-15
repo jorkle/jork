@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/jorkle/jork/internal/models"
@@ -192,7 +194,16 @@ func (c *OpenAIClient) FetchAvailableModels() ([]string, error) {
 	}
 	models := make([]string, 0, len(result.Data))
 	for _, m := range result.Data {
-		models = append(models, m.ID)
+		id := m.ID
+		// Skip models with a date timestamp pattern (e.g. "2023-03-14")
+		if matched, _ := regexp.MatchString(`\d{4}-\d{2}-\d{2}`, id); matched {
+			continue
+		}
+		// Skip models not suitable for text-to-text communication (e.g. Whisper models)
+		if strings.Contains(id, "whisper") {
+			continue
+		}
+		models = append(models, id)
 	}
 	return models, nil
 }
