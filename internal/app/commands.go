@@ -59,6 +59,13 @@ func StopRecordingCmd(app *App) tea.Cmd {
 // ProcessTextCmd returns a command to process text input
 func ProcessTextCmd(app *App, input string) tea.Cmd {
 	return func() tea.Msg {
+		// Run health check before starting conversation
+		if err := app.HealthCheck(); err != nil {
+			return ProcessingCompletedMsg{
+				Response: "",
+				Error:    "Health check failed: " + err.Error(),
+			}
+		}
 		response, err := app.ProcessTextInput(input)
 		
 		// Handle voice output if needed

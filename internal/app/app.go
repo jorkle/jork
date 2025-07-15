@@ -17,7 +17,7 @@ import (
 // App represents the main application
 type App struct {
 	config       *config.Config
-	claudeClient *ai.ClaudeClient
+	openaiClient *ai.OpenAIClient
 	ttsClient    *ai.TTSClient
 	sttClient    *ai.STTClient
 	recorder     *audio.Recorder
@@ -33,7 +33,7 @@ func NewApp() (*App, error) {
 	}
 
 	// Initialize AI clients
-	claudeClient := ai.NewClaudeClient(cfg.AnthropicAPIKey, cfg.ClaudeModel)
+	openaiClient := ai.NewOpenAIClient(cfg.OpenAIAPIKey, cfg.ConversationModel)
 	ttsClient := ai.NewTTSClient(cfg.OpenAIAPIKey, cfg.OpenAITTSModel, cfg.OpenAITTSVoice)
 	sttClient := ai.NewSTTClient(cfg.OpenAIAPIKey, cfg.OpenAISTTModel)
 
@@ -98,7 +98,7 @@ func (a *App) ProcessTextInput(input string) (string, error) {
 	defer func() { a.state.IsProcessing = false }()
 
 	// Generate response using Claude
-	response, err := a.claudeClient.GenerateResponse(
+	response, err := a.openaiClient.GenerateResponse(
 		input,
 		a.state.KnowledgeLevel,
 		a.state.CurrentMode,
@@ -326,4 +326,11 @@ func (a *App) cleanupTempFiles() error {
 
 		return nil
 	})
+}
+	
+// HealthCheck performs a simple API call to ensure OpenAI API calls are functional.
+func (a *App) HealthCheck() error {
+	// Use a simple "health check" prompt.
+	_, err := a.openaiClient.GenerateResponse("health check", models.CoWorker, a.state.CurrentMode, a.state.ConversationLog, "health")
+	return err
 }

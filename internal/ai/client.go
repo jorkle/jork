@@ -12,7 +12,7 @@ import (
 )
 
 // ClaudeClient handles communication with the Anthropic Claude API
-type ClaudeClient struct {
+type OpenAIClient struct {
 	APIKey     string
 	Model      string
 	HTTPClient *http.Client
@@ -20,11 +20,11 @@ type ClaudeClient struct {
 }
 
 // NewClaudeClient creates a new Claude API client
-func NewClaudeClient(apiKey, model string) *ClaudeClient {
-	return &ClaudeClient{
+func NewOpenAIClient(apiKey, model string) *OpenAIClient {
+	return &OpenAIClient{
 		APIKey:  apiKey,
 		Model:   model,
-		BaseURL: "https://api.anthropic.com/v1/messages",
+		BaseURL: "https://api.openai.com/v1/chat/completions",
 		HTTPClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -53,12 +53,17 @@ func (c *ClaudeClient) GenerateResponse(
 		Content: formattedInput,
 	})
 
-	// Create the request
-	request := models.ClaudeRequest{
-		Model:     c.Model,
-		MaxTokens: 1000,
-		Messages:  messages,
-		System:    systemPrompt,
+	// Create the request for OpenAI Chat Completions
+	request := struct {
+		Model       string           `json:"model"`
+		Messages    []models.Message `json:"messages"`
+		Temperature float32          `json:"temperature"`
+		MaxTokens   int              `json:"max_tokens"`
+	}{
+		Model:       c.Model,
+		Messages:    messages,
+		Temperature: 0.7,
+		MaxTokens:   1000,
 	}
 
 	// Marshal the request to JSON
@@ -75,8 +80,7 @@ func (c *ClaudeClient) GenerateResponse(
 
 	// Set headers
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", c.APIKey)
-	req.Header.Set("anthropic-version", "2023-06-01")
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
 
 	// Send the request
 	resp, err := c.HTTPClient.Do(req)

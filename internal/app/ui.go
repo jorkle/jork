@@ -567,6 +567,7 @@ func (m *Model) renderSettings() string {
 		encryptStr = "On"
 	}
 	settings = append(settings, fmt.Sprintf("Encrypt Settings: %s", encryptStr))
+	settings = append(settings, "OpenAI API Key: ****")
 
 	// Render each setting, highlighting the selected one
 	var renderedItems []string
@@ -590,7 +591,7 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	case "down", "j":
-		if m.selectedSetting < 6 {
+		if m.selectedSetting < 7 {
 			m.selectedSetting++
 		}
 		return m, nil
@@ -612,6 +613,9 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		// If the selected setting is "Encrypt Settings", toggle its value.
 		if m.selectedSetting == 6 {
 			m.app.config.EncryptSettings = !m.app.config.EncryptSettings
+		} else if m.selectedSetting == 7 {
+			m.editTitle = "Enter OpenAI API Key"
+			m.editOptions = []string{m.app.config.OpenAIAPIKey}
 		} else {
 			// For other settings, enter the editing dialog
 			switch m.selectedSetting {
@@ -634,9 +638,9 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				m.editTitle = "Select Speech Verbosity"
 				m.editOptions = []string{"1", "2", "3"}
 			}
-			m.cursor = 0
-			m.uiState = SettingsEdit
 		}
+		m.cursor = 0
+		m.uiState = SettingsEdit
 		return m, nil
 	default:
 		return m, nil
