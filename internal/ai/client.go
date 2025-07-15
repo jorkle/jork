@@ -56,9 +56,6 @@ func (c *OpenAIClient) GenerateResponse(
 	})
 	var requestBody []byte
 	var err error
-
-	var requestBody []byte
-	var err error
 	if strings.Contains(strings.ToLower(c.Model), "claude") {
 		req := struct {
 			Model       string           `json:"model"`
