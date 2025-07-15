@@ -532,7 +532,7 @@ type processingDoneMsg struct {
 	error    string
 }
 
-// tickRecording creates a command to update recording time
+	// tickRecording creates a command to update recording time
 func (m *Model) tickRecording() tea.Cmd {
 	return tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg {
 		return recordingTickMsg{duration: m.recordingTime + 100*time.Millisecond}
@@ -542,6 +542,21 @@ func (m *Model) tickRecording() tea.Cmd {
 // processVoiceInput creates a command to process voice input
 func (m *Model) processVoiceInput(audioData *models.AudioData) tea.Cmd {
 	return ProcessVoiceCmd(m.app, audioData)
+}
+
+// Add key handling for the Startup Wizard state
+func (m *Model) handleStartupWizardKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "enter":
+		// Finish the setup wizard and return to the main menu
+		m.uiState = MainMenu
+		return m, nil
+	case "esc", "q":
+		m.uiState = MainMenu
+		return m, nil
+	default:
+		return m, nil
+	}
 }
 
 // Styles
