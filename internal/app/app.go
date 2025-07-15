@@ -329,9 +329,13 @@ func (a *App) cleanupTempFiles() error {
 	})
 }
 	
-// HealthCheck performs a simple API call to ensure OpenAI API calls are functional.
 func (a *App) HealthCheck() error {
 	// Use a simple "health check" prompt.
 	_, err := a.openaiClient.GenerateResponse("health check", models.CoWorker, a.state.CurrentMode, a.state.ConversationLog, "health")
+	if err == nil {
+		if modelsList, err2 := a.openaiClient.FetchAvailableModels(); err2 == nil {
+			a.config.AvailableModels = modelsList
+		}
+	}
 	return err
 }
