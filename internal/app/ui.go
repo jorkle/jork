@@ -21,7 +21,6 @@ const (
 	Recording
 	Processing
 	Settings       // NEW: Settings menu state
-	StartupWizard  // NEW: Startup wizard state
 )
 
 // Model represents the Bubbletea model
@@ -134,8 +133,6 @@ func (m *Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleProcessingKeys(msg)
 	case Settings:
 		return m.handleSettingsKeys(msg)
-	case StartupWizard:
-		return m.handleStartupWizardKeys(msg)
 	default:
 		return m, nil
 	}
@@ -161,9 +158,6 @@ func (m *Model) handleMainMenuKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case "5":
 		m.uiState = Settings
-		return m, nil
-	case "6":
-		m.uiState = StartupWizard
 		return m, nil
 	}
 	return m, nil
@@ -313,8 +307,6 @@ func (m *Model) View() string {
 		return m.renderProcessing()
 	case Settings:
 		return m.renderSettings()
-	case StartupWizard:
-		return m.renderStartupWizard()
 	default:
 		return "Unknown state"
 	}
@@ -493,15 +485,6 @@ func (m *Model) renderProcessing() string {
 }
 
 // renderStartupWizard renders the initial configuration wizard UI
-func (m *Model) renderStartupWizard() string {
-	title := titleStyle.Render("JORK Setup Wizard")
-	instructions := "Configure your settings interactively:\n" +
-		"1. Enter your API keys and model details when prompted\n" +
-		"2. Use arrow keys to navigate options\n" +
-		"3. Press Enter to confirm, Esc to cancel"
-	help := helpStyle.Render("Press Enter to finish setup or Esc to cancel")
-	return lipgloss.JoinVertical(lipgloss.Center, title, "", instructions, "", help)
-}
 
 // formatConversationHistory formats the conversation history for display
 func (m *Model) formatConversationHistory() string {
