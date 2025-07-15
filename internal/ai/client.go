@@ -54,6 +54,8 @@ func (c *OpenAIClient) GenerateResponse(
 		Role:    "user",
 		Content: formattedInput,
 	})
+	var requestBody []byte
+	var err error
 
 	var requestBody []byte
 	var err error
