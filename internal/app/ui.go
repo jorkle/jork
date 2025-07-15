@@ -327,7 +327,6 @@ func (m *Model) renderMainMenu() string {
 3. Start Conversation
 4. View Conversation History
 5. Settings
-6. Setup Wizard
 
 Press 'q' to quit`
 
