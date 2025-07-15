@@ -17,6 +17,13 @@ type Config struct {
 	ClaudeModel     string
 	OpenAITTSModel  string
 	OpenAITTSVoice  string
+	ConversationModel string
+	TTSTargetModel    string
+	TTSTargetVoice    string
+	STTTargetModel    string
+	ResponseVerbosity int
+	SpeechVerbosity   int
+	EncryptSettings   bool
 	OpenAISTTModel  string
 	
 	// Audio Configuration
@@ -55,6 +62,13 @@ func DefaultConfig() *Config {
 		}(),
 		OpenAITTSModel:  "tts-1",
 		OpenAITTSVoice:  "alloy",
+		ConversationModel: "claude-3-5-sonnet-20241022",
+		TTSTargetModel:    "tts-1",
+		TTSTargetVoice:    "alloy",
+		STTTargetModel:    "whisper-1",
+		ResponseVerbosity: 2,
+		SpeechVerbosity:   2,
+		EncryptSettings:   false,
 		OpenAISTTModel:  "whisper-1",
 		
 		// Audio Configuration

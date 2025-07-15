@@ -39,6 +39,7 @@ type Model struct {
 	recordingTime time.Duration
 	width         int
 	height        int
+	isSamplingVoice bool  // NEW: flag for TTS voice sample playback
 }
 
 // NewModel creates a new Bubbletea model
@@ -130,6 +131,8 @@ func (m *Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleRecordingKeys(msg)
 	case Processing:
 		return m.handleProcessingKeys(msg)
+	case Settings:
+		return m.handleSettingsKeys(msg)
 	default:
 		return m, nil
 	}
