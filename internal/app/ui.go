@@ -590,6 +590,15 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.isSamplingVoice = false
 		}
 		return m, nil
+	case "enter":
+		// If the selected setting is "Encrypt Settings", toggle its value.
+		if m.selectedSetting == 6 {
+			m.app.config.EncryptSettings = !m.app.config.EncryptSettings
+		} else {
+			// For other settings, indicate that editing is not implemented.
+			m.error = "Editing not implemented for this setting"
+		}
+		return m, nil
 	}
 	return m, nil
 }
