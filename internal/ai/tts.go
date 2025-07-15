@@ -16,6 +16,7 @@ type TTSClient struct {
 	client *openai.Client
 	model  string
 	voice  string
+	speed  float32
 }
 
 // NewTTSClient creates a new TTS client
@@ -24,12 +25,24 @@ func NewTTSClient(apiKey, model, voice string) *TTSClient {
 		client: openai.NewClient(apiKey),
 		model:  model,
 		voice:  voice,
+		speed:  1.0,
 	}
 }
 
 // SetVoice updates the TTS client's voice.
 func (t *TTSClient) SetVoice(voice string) {
 	t.voice = voice
+}
+
+func (t *TTSClient) SetSpeed(speed int) {
+	switch speed {
+	case 1:
+		t.speed = 0.8
+	case 3:
+		t.speed = 1.2
+	default:
+		t.speed = 1.0
+	}
 }
 
 // TextToSpeech converts text to audio and saves it to a file
@@ -61,6 +74,7 @@ func (t *TTSClient) TextToSpeech(text string, outputPath string) error {
 	default:
 		req.Voice = openai.VoiceAlloy
 	}
+	req.Speed = t.speed
 
 	// Make the request
 	response, err := t.client.CreateSpeech(ctx, req)
