@@ -57,7 +57,7 @@ func NewApp() (*App, error) {
 
 	return &App{
 		config:       cfg,
-		claudeClient: claudeClient,
+		openaiClient: openaiClient,
 		ttsClient:    ttsClient,
 		sttClient:    sttClient,
 		recorder:     recorder,
