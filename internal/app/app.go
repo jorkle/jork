@@ -69,8 +69,8 @@ func NewApp() (*App, error) {
 // Run starts the application
 func (a *App) Run() error {
 	// Validate API keys
-	if err := a.claudeClient.ValidateAPIKey(); err != nil {
-		return fmt.Errorf("invalid Anthropic API key: %w", err)
+	if err := a.openaiClient.ValidateAPIKey(); err != nil {
+		return fmt.Errorf("invalid OpenAI API key: %w", err)
 	}
 
 	if err := a.ttsClient.ValidateAPIKey(); err != nil {
@@ -261,7 +261,7 @@ func (a *App) PlayAudioSample() error {
 // GenerateExplanationSample creates a sample explanation using the current knowledge level.
 func (a *App) GenerateExplanationSample() (string, error) {
 	prompt := fmt.Sprintf("Explain photosynthesis in a way suitable for %s.", a.state.KnowledgeLevel.String())
-	return a.claudeClient.GenerateResponse(
+	return a.openaiClient.GenerateResponse(
 		prompt,
 		a.state.KnowledgeLevel,
 		a.state.CurrentMode,

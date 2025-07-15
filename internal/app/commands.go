@@ -63,7 +63,7 @@ func ProcessTextCmd(app *App, input string) tea.Cmd {
 		if err := app.HealthCheck(); err != nil {
 			return ProcessingCompletedMsg{
 				Response: "",
-				Error:    "Health check failed: " + err.Error(),
+				Error:    fmt.Errorf("Health check failed: %s", err.Error()),
 			}
 		}
 		response, err := app.ProcessTextInput(input)
