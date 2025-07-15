@@ -27,6 +27,11 @@ func NewTTSClient(apiKey, model, voice string) *TTSClient {
 	}
 }
 
+// SetVoice updates the TTS client's voice.
+func (t *TTSClient) SetVoice(voice string) {
+	t.voice = voice
+}
+
 // TextToSpeech converts text to audio and saves it to a file
 func (t *TTSClient) TextToSpeech(text string, outputPath string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
