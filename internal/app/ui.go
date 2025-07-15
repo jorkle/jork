@@ -648,30 +648,72 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		} else if m.selectedSetting == 7 {
 			m.editTitle = "Enter OpenAI API Key"
 			m.editOptions = []string{m.app.config.OpenAIAPIKey}
+			m.cursor = 0
 		} else {
-			// For other settings, enter the editing dialog
+			// For other settings, enter the editing dialog and set cursor to the current value.
 			switch m.selectedSetting {
 			case 0:
 				m.editTitle = "Select Conversation Model"
 				m.editOptions = []string{"claude-3-5-sonnet-20241022", "gpt-4"}
+				for i, option := range m.editOptions {
+					if option == m.app.config.ConversationModel {
+						m.cursor = i
+						break
+					}
+				}
 			case 1:
 				m.editTitle = "Select TTS Model"
 				m.editOptions = []string{"tts-1", "tts-2"}
+				for i, option := range m.editOptions {
+					if option == m.app.config.TTSTargetModel {
+						m.cursor = i
+						break
+					}
+				}
 			case 2:
 				m.editTitle = "Select TTS Voice"
 				m.editOptions = []string{"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
+				for i, option := range m.editOptions {
+					if option == m.app.config.TTSTargetVoice {
+						m.cursor = i
+						break
+					}
+				}
 			case 3:
 				m.editTitle = "Select STT Model"
 				m.editOptions = []string{"whisper-1", "whisper-2"}
+				for i, option := range m.editOptions {
+					if option == m.app.config.STTTargetModel {
+						m.cursor = i
+						break
+					}
+				}
 			case 4:
 				m.editTitle = "Select Response Verbosity"
 				m.editOptions = []string{"1", "2", "3"}
+				{
+					current := strconv.Itoa(m.app.config.ResponseVerbosity)
+					for i, option := range m.editOptions {
+						if option == current {
+							m.cursor = i
+							break
+						}
+					}
+				}
 			case 5:
 				m.editTitle = "Select Speech Speed"
 				m.editOptions = []string{"1", "2", "3"}
+				{
+					current := strconv.Itoa(m.app.config.SpeechSpeed)
+					for i, option := range m.editOptions {
+						if option == current {
+							m.cursor = i
+							break
+						}
+					}
+				}
 			}
 		}
-		m.cursor = 0
 		m.uiState = SettingsEdit
 		return m, nil
 	default:
