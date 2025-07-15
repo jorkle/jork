@@ -633,15 +633,13 @@ func (m *Model) handleSettingsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.uiState = MainMenu
 		return m, nil
 	case "v":
-		if !m.isSamplingVoice {
-			m.isSamplingVoice = true
-			go func() {
-				_ = m.app.PlayAudioSample()
-			}()
-		} else {
-			_ = m.app.StopAudio()
+		// Always stop any playing audio and reset flag, then play new sample.
+		_ = m.app.StopAudio()
+		m.isSamplingVoice = false
+		go func() {
+			_ = m.app.PlayAudioSample()
 			m.isSamplingVoice = false
-		}
+		}()
 		return m, nil
 	case "enter":
 		// If the selected setting is "Encrypt Settings", toggle its value.
