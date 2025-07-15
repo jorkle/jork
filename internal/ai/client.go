@@ -13,7 +13,7 @@ import (
 	"github.com/jorkle/jork/internal/models"
 )
 
- // OpenAIClient handles communication with the OpenAI API
+// OpenAIClient handles communication with the OpenAI API
 type OpenAIClient struct {
 	APIKey     string
 	Model      string
@@ -67,13 +67,11 @@ func (c *OpenAIClient) GenerateResponse(
 		requestBody, err = json.Marshal(req)
 	} else {
 		req := struct {
-			Model       string           `json:"model"`
-			Messages    []models.Message `json:"messages"`
-			Temperature float32          `json:"temperature"`
+			Model    string           `json:"model"`
+			Messages []models.Message `json:"messages"`
 		}{
-			Model:       c.Model,
-			Messages:    messages,
-			Temperature: 0.7,
+			Model:    c.Model,
+			Messages: messages,
 		}
 		requestBody, err = json.Marshal(req)
 	}
@@ -131,7 +129,7 @@ func (c *OpenAIClient) ValidateAPIKey() error {
 			Content: "Hello",
 		},
 	}
-	
+
 	var requestBody []byte
 	var err error
 	if strings.Contains(strings.ToLower(c.Model), "claude") {
@@ -145,13 +143,11 @@ func (c *OpenAIClient) ValidateAPIKey() error {
 		requestBody, err = json.Marshal(req)
 	} else {
 		req := struct {
-			Model       string           `json:"model"`
-			Messages    []models.Message `json:"messages"`
-			Temperature float32          `json:"temperature"`
+			Model    string           `json:"model"`
+			Messages []models.Message `json:"messages"`
 		}{
-			Model:       c.Model,
-			Messages:    testMessages,
-			Temperature: 0.7,
+			Model:    c.Model,
+			Messages: testMessages,
 		}
 		requestBody, err = json.Marshal(req)
 	}
