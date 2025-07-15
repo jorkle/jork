@@ -81,6 +81,33 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.lastResponse = msg.response
 		m.error = msg.error
 		return m, nil
+
+	case RecordingStartedMsg:
+		m.recording = true
+		m.recordingTime = 0
+		m.uiState = Recording
+		return m, m.tickRecording()
+
+	case RecordingStoppedMsg:
+		m.recording = false
+		if msg.Error != nil {
+			m.error = msg.Error.Error()
+			m.uiState = Conversation
+		} else {
+			m.uiState = Processing
+			return m, m.processVoiceInput(msg.AudioData.(*models.AudioData))
+		}
+		return m, nil
+
+	case ProcessingCompletedMsg:
+		m.uiState = Conversation
+		m.lastResponse = msg.Response
+		if msg.Error != nil {
+			m.error = msg.Error.Error()
+		} else {
+			m.error = ""
+		}
+		return m, nil
 	}
 
 	return m, nil
@@ -212,7 +239,7 @@ func (m *Model) handleConversationSubmit() (tea.Model, tea.Cmd) {
 	m.uiState = Processing
 	m.error = ""
 
-	return m, m.processTextInput(input)
+	return m, ProcessTextCmd(m.app, input)
 }
 
 // handleVoiceInput handles voice input
@@ -223,15 +250,7 @@ func (m *Model) handleVoiceInput() (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	if err := m.app.StartRecording(); err != nil {
-		m.error = fmt.Sprintf("Failed to start recording: %v", err)
-		return m, nil
-	}
-
-	m.uiState = Recording
-	m.recording = true
-	m.recordingTime = 0
-	return m, m.tickRecording()
+	return m, StartRecordingCmd(m.app)
 }
 
 // handleRecordingKeys handles recording state
@@ -260,17 +279,7 @@ func (m *Model) handleProcessingKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 // stopRecording stops recording and processes the audio
 func (m *Model) stopRecording() (tea.Model, tea.Cmd) {
-	audioData, err := m.app.StopRecording()
-	if err != nil {
-		m.error = fmt.Sprintf("Failed to stop recording: %v", err)
-		m.recording = false
-		m.uiState = Conversation
-		return m, nil
-	}
-
-	m.recording = false
-	m.uiState = Processing
-	return m, m.processVoiceInput(audioData)
+	return m, StopRecordingCmd(m.app)
 }
 
 // View renders the UI
@@ -499,56 +508,9 @@ func (m *Model) tickRecording() tea.Cmd {
 	})
 }
 
-// processTextInput creates a command to process text input
-func (m *Model) processTextInput(input string) tea.Cmd {
-	return func() tea.Msg {
-		response, err := m.app.ProcessTextInput(input)
-		
-		// Handle voice output if needed
-		if m.app.state.CurrentMode == models.TextToVoice || m.app.state.CurrentMode == models.VoiceToVoice {
-			if err == nil {
-				if audioFile, audioErr := m.app.GenerateVoiceResponse(response); audioErr == nil {
-					m.app.PlayAudio(audioFile)
-				}
-			}
-		}
-		
-		var errorMsg string
-		if err != nil {
-			errorMsg = err.Error()
-		}
-		
-		return processingDoneMsg{
-			response: response,
-			error:    errorMsg,
-		}
-	}
-}
-
 // processVoiceInput creates a command to process voice input
 func (m *Model) processVoiceInput(audioData *models.AudioData) tea.Cmd {
-	return func() tea.Msg {
-		response, err := m.app.ProcessVoiceInput(audioData)
-		
-		// Handle voice output if needed
-		if m.app.state.CurrentMode == models.VoiceToVoice {
-			if err == nil {
-				if audioFile, audioErr := m.app.GenerateVoiceResponse(response); audioErr == nil {
-					m.app.PlayAudio(audioFile)
-				}
-			}
-		}
-		
-		var errorMsg string
-		if err != nil {
-			errorMsg = err.Error()
-		}
-		
-		return processingDoneMsg{
-			response: response,
-			error:    errorMsg,
-		}
-	}
+	return ProcessVoiceCmd(m.app, audioData)
 }
 
 // Styles

@@ -49,14 +49,20 @@ func (r *Recorder) StartRecording() error {
 	// Clear the buffer
 	r.buffer = r.buffer[:0]
 
+	// Get default input device
+	defaultDevice, err := portaudio.DefaultInputDevice()
+	if err != nil {
+		return fmt.Errorf("failed to get default input device: %w", err)
+	}
+
 	// Create input parameters
 	inputParams := portaudio.StreamParameters{
 		Input: portaudio.StreamDeviceParameters{
-			Device:   portaudio.DefaultInputDevice(),
+			Device:   defaultDevice,
 			Channels: r.channels,
-			Latency:  portaudio.DefaultInputDevice().DefaultLowInputLatency,
+			Latency:  defaultDevice.DefaultLowInputLatency,
 		},
-		SampleRate:      portaudio.SampleRate(r.sampleRate),
+		SampleRate:      float64(r.sampleRate),
 		FramesPerBuffer: 1024,
 	}
 

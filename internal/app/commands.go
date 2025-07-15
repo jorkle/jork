@@ -60,6 +60,14 @@ func StopRecordingCmd(app *App) tea.Cmd {
 func ProcessTextCmd(app *App, input string) tea.Cmd {
 	return func() tea.Msg {
 		response, err := app.ProcessTextInput(input)
+		
+		// Handle voice output if needed
+		if err == nil && (app.state.CurrentMode == models.TextToVoice || app.state.CurrentMode == models.VoiceToVoice) {
+			if audioFile, audioErr := app.GenerateVoiceResponse(response); audioErr == nil {
+				go app.PlayAudio(audioFile) // Play in background
+			}
+		}
+		
 		return ProcessingCompletedMsg{
 			Response: response,
 			Error:    err,
@@ -73,6 +81,14 @@ func ProcessVoiceCmd(app *App, audioData interface{}) tea.Cmd {
 		// Type assertion to get the actual audio data
 		if data, ok := audioData.(*models.AudioData); ok {
 			response, err := app.ProcessVoiceInput(data)
+			
+			// Handle voice output if needed
+			if err == nil && app.state.CurrentMode == models.VoiceToVoice {
+				if audioFile, audioErr := app.GenerateVoiceResponse(response); audioErr == nil {
+					go app.PlayAudio(audioFile) // Play in background
+				}
+			}
+			
 			return ProcessingCompletedMsg{
 				Response: response,
 				Error:    err,

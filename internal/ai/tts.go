@@ -34,7 +34,7 @@ func (t *TTSClient) TextToSpeech(text string, outputPath string) error {
 
 	// Create the TTS request
 	req := openai.CreateSpeechRequest{
-		Model: t.model,
+		Model: openai.TTSModel1,
 		Input: text,
 		Voice: openai.VoiceAlloy, // Default voice, can be made configurable
 	}
@@ -92,7 +92,7 @@ func (t *TTSClient) ValidateAPIKey() error {
 
 	// Try to make a simple request to validate the API key
 	req := openai.CreateSpeechRequest{
-		Model: t.model,
+		Model: openai.SpeechModel(t.model),
 		Input: "test",
 		Voice: openai.VoiceAlloy,
 	}
